@@ -39,37 +39,37 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
         List<Pathology> pathologyList = new ArrayList<>();
         String bmi = calculateBMI(request.getWeight(), request.getHeight());
         List<Question> question = new ArrayList<>();
-        if (request.getGlucose() >= BloodBiochemistryLimit.PREDIABETES_MIN && request.getGlucose() < BloodBiochemistryLimit.GLUCOSE_HUNGRY && request.getHba1c() >= BloodBiochemistryLimit.HBA1C) {
-            // Tiền tiểu đường - chắc chắn
+        if (checkAllParam(request)) {
+            Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY000");
+            pathologyList.add(pathology.get());
+            response.setPathologyList(pathologyList);
+            return response;
+        }
+        if (request.getGlucose() >= 5.6 && request.getGlucose() < 7.0 && request.getHba1c() >= 5.7) {
             Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY001");
             pathologyList.add(pathology.get());
-            question = questionRepository.findLikePathology("PATHOLOGY001");
+            question = questionRepository.findLikePathology("PATHOLOGY001");//Tiền tiểu đường
         }
-        if (request.getGlucose() >= BloodBiochemistryLimit.GLUCOSE_HUNGRY && request.getHba1c() >= BloodBiochemistryLimit.HBA1C) {
-            // Tiểu đường - chắc chắn
-            Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY002");
+        if (request.getGlucose() >= 7.0 && request.getHba1c() >= 6.5) {
+            Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY002");//Tiểu đường
             pathologyList.add(pathology.get());
             question = questionRepository.findLikePathology("PATHOLOGY002");
         }
-        if (request.getGlucose() >= BloodBiochemistryLimit.PREDIABETES_MIN && request.getGlucose() < BloodBiochemistryLimit.GLUCOSE_HUNGRY && request.getHba1c() < BloodBiochemistryLimit.HBA1C) {
-            // Tiền tiểu đường - nghi ngờ
-            Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY003");
+        if (request.getGlucose() >= 5.6 && request.getGlucose() < 7.0 && request.getHba1c() < 5.7) {
+            Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY003");//
             pathologyList.add(pathology.get());
             question = questionRepository.findLikePathology("PATHOLOGY003");
         }
-        if (request.getGlucose() >= BloodBiochemistryLimit.GLUCOSE_HUNGRY && request.getHba1c() < BloodBiochemistryLimit.HBA1C) {
-            // Tiểu đường - nghi ngờ
+        if (request.getGlucose() >= 7.0 && request.getHba1c() < 6.5) {
             Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY004");
             pathologyList.add(pathology.get());
             question = questionRepository.findLikePathology("PATHOLOGY004");
         }
-        if (!(request.getGender().equalsIgnoreCase("female") && request.getPregnant())) {
-            for (int i=0; i< question.size(); i++) {
-                if (question.get(i).getId().equalsIgnoreCase("QUESTION001")) {
-                    question.remove(i);
-                    break;
-                }
-            }
+        if ((request.getAcidUric() > 8.0 && request.getGender().equalsIgnoreCase("male"))
+                || (request.getAcidUric() > 7.5 && request.getGender().equalsIgnoreCase("female"))) {
+            Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY005");
+            pathologyList.add(pathology.get());
+            question.addAll(questionRepository.findLikePathology("PATHOLOGY005"));
         }
         response.setPathologyList(pathologyList);
         response.setQuestionList(question);
@@ -85,16 +85,91 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
         for (int i = 0; i < pathologyList.size(); i++) {
             if (pathologyList.get(i).getId().contains("PATHOLOGY001") || pathologyList.get(i).getId().contains("PATHOLOGY002")
                     || pathologyList.get(i).getId().contains("PATHOLOGY003") || pathologyList.get(i).getId().contains("PATHOLOGY004")) {
-                QuestionSecondProcess fourMany = new QuestionSecondProcess();
+                QuestionSecondProcess question001 = new QuestionSecondProcess();
+                QuestionSecondProcess question002 = new QuestionSecondProcess();
                 for (int j = 0; j < questionList.size(); j++) {
-                    if (questionList.get(i).getId().contains("QUESTION003")) {
-                        fourMany.setId(questionList.get(i).getId());
-                        fourMany.setResult(questionList.get(i).isResult());
+                    if (questionList.get(j).getId().contains("QUESTION001")) {
+                        question001.setId(questionList.get(i).getId());
+                        question001.setResult(questionList.get(i).isResult());
+                        break;
                     }
                 }
-                if (fourMany.isResult()) {
-                    Optional<Advice>advice = adviceRepository.findById("ADVICE001");
-                    adviceList.add(advice.get());
+                for (int j = 0; j < questionList.size(); j++) {
+                    if (questionList.get(j).getId().contains("QUESTION002")) {
+                        question002.setId(questionList.get(i).getId());
+                        question002.setResult(questionList.get(i).isResult());
+                        break;
+                    }
+                }
+                if (!request.getPregnant()) {
+                    if (request.getAge() < 30 && question002.isResult() && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
+                        Optional<Advice> advice = adviceRepository.findById("ADVICE001");
+                        adviceList.add(advice.get());
+                    }
+                    if (request.getAge() < 30 && !question002.isResult() && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
+                        Optional<Advice> advice = adviceRepository.findById("ADVICE002");
+                        adviceList.add(advice.get());
+                    }
+                    if (request.getAge() > 30 && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
+                        Optional<Advice> advice = adviceRepository.findById("ADVICE003");
+                        adviceList.add(advice.get());
+                    }
+                    if (request.getAge() < 30 && question002.isResult() && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY001") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY003"))) {
+                        Optional<Advice> advice = adviceRepository.findById("ADVICE004");
+                        adviceList.add(advice.get());
+                    }
+                    if (!question002.isResult() && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY001") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY003"))) {
+                        Optional<Advice> advice = adviceRepository.findById("ADVICE005");
+                        adviceList.add(advice.get());
+                    }
+                }
+                if (request.getPregnant()) {
+                    if (request.getAge() < 30 && !question002.isResult() && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY001") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY003"))) {
+                        Optional<Advice> advice = adviceRepository.findById("ADVICE006");
+                        adviceList.add(advice.get());
+                    }
+                    if (request.getAge() >= 30 && !question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY001") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY003"))) {
+                        Optional<Advice> advice = adviceRepository.findById("ADVICE007");
+                        adviceList.add(advice.get());
+                    }
+                    if (request.getAge() < 30 && !question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
+                        Optional<Advice> advice = adviceRepository.findById("ADVICE008");
+                        adviceList.add(advice.get());
+                    }
+                    if (request.getAge() >= 30 && !question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
+                        Optional<Advice> advice = adviceRepository.findById("ADVICE009");
+                        adviceList.add(advice.get());
+                    }
+                    if (request.getAge() >= 30 && question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY001") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY003"))) {
+                        Optional<Advice> advice = adviceRepository.findById("ADVICE010");
+                        adviceList.add(advice.get());
+                    }
+                    if (request.getAge() < 30 && question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY001") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY003"))) {
+                        Optional<Advice> advice = adviceRepository.findById("ADVICE013");
+                        adviceList.add(advice.get());
+                    }
+                    if (request.getAge() >= 30 && question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
+                        Optional<Advice> advice = adviceRepository.findById("ADVICE014");
+                        adviceList.add(advice.get());
+                    }
+                    if (request.getAge() < 30 && question002.isResult() && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
+                        Optional<Advice> advice = adviceRepository.findById("ADVICE015");
+                        adviceList.add(advice.get());
+                    }
+                }
+            }
+            if (pathologyList.get(i).getId().contains("PATHOLOGY005")) {
+                for (int j = 0; j < questionList.size(); j++) {
+                    if (questionList.get(j).getId().contains("QUESTION003")) {
+                        if (questionList.get(j).isResult()) {
+                            Optional<Advice> advice = adviceRepository.findById("ADVICE011");
+                            adviceList.add(advice.get());
+                        } else {
+                            Optional<Advice> advice = adviceRepository.findById("ADVICE012");
+                            adviceList.add(advice.get());
+                        }
+                        break;
+                    }
                 }
             }
         }
@@ -117,4 +192,30 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
         return "NO_DATA";
     }
 
+    private boolean checkAllParam(FirstProcessRequest request) {
+        if (request.getGlucose() < 5.6 && request.getHba1c() < 5.7 && request.getAlbumin() >= 35 && request.getAlbumin() <= 50
+                && request.getAlt() >= 7 && request.getAlt() <= 56 && request.getAlp() >= 30 && request.getAlp() <= 120
+                && request.getUre() >= 2.5 && request.getUre() <= 7.5 && request.getBilirubinTp() >= 3.4 && request.getBilirubinTp() <= 17.1
+                && request.getBilirubinTt() <= 7.0) {
+            if (request.getGender().equalsIgnoreCase("male")) {
+                if (request.getAst() <= 50 && request.getAst() >= 10 && request.getCreatinin() <= 106 && request.getCreatinin() >= 53
+                        && request.getAcidUric() <= 8.0 && request.getAcidUric() >= 2.5) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            if (request.getGender().equalsIgnoreCase("female")) {
+                if (request.getAst() <= 35 && request.getAst() >= 9 && request.getCreatinin() <= 97 && request.getCreatinin() >= 44
+                        && request.getAcidUric() <= 7.5 && request.getAcidUric() >= 1.9) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+        return true;
+    }
 }
