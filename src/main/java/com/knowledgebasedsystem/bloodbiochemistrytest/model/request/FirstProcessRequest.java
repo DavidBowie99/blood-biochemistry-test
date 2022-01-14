@@ -28,9 +28,9 @@ public class FirstProcessRequest {
 
     private Float glucose;//Chỉ số đường huyết - đơn vị: mmol/L
 
-    private Float bilirubinTp;//Chỉ số bilirubin toàn phần
+    private Float bilirubinTP;//Chỉ số bilirubin toàn phần
 
-    private Float bilirubinTt;//Chỉ số bilirubin trực tiếp
+    private Float bilirubinTT;//Chỉ số bilirubin trực tiếp
 
     private Float alp;//Chỉ số ALP
 

@@ -16,6 +16,7 @@ import com.knowledgebasedsystem.bloodbiochemistrytest.repository.QuestionReposit
 import com.knowledgebasedsystem.bloodbiochemistrytest.service.AnalysisBloodBiochemistryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,12 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
         List<Pathology> pathologyList = new ArrayList<>();
         String bmi = calculateBMI(request.getWeight(), request.getHeight());
         List<Question> question = new ArrayList<>();
+        if (!validateInput(request)) {
+            Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY999");
+            pathologyList.add(pathology.get());
+            response.setPathologyList(pathologyList);
+            return response;
+        }
         if (checkAllParam(request)) {
             Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY000");
             pathologyList.add(pathology.get());
@@ -70,6 +77,10 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
             Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY005");
             pathologyList.add(pathology.get());
             question.addAll(questionRepository.findLikePathology("PATHOLOGY005"));
+        }
+        if (request.getBilirubinTP() >= 513) {
+            Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY006");
+            pathologyList.add(pathology.get());
         }
         response.setPathologyList(pathologyList);
         response.setQuestionList(question);
@@ -110,7 +121,7 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
                         Optional<Advice> advice = adviceRepository.findById("ADVICE002");
                         adviceList.add(advice.get());
                     }
-                    if (request.getAge() > 30 && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
+                    if (request.getAge() >= 30 && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
                         Optional<Advice> advice = adviceRepository.findById("ADVICE003");
                         adviceList.add(advice.get());
                     }
@@ -124,36 +135,20 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
                     }
                 }
                 if (request.getPregnant()) {
-                    if (request.getAge() < 30 && !question002.isResult() && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY001") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY003"))) {
+                    if (!question002.isResult() && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY001") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY003"))) {
                         Optional<Advice> advice = adviceRepository.findById("ADVICE006");
                         adviceList.add(advice.get());
                     }
-                    if (request.getAge() >= 30 && !question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY001") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY003"))) {
+                    if (!question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
                         Optional<Advice> advice = adviceRepository.findById("ADVICE007");
                         adviceList.add(advice.get());
                     }
-                    if (request.getAge() < 30 && !question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
+                    if (question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
                         Optional<Advice> advice = adviceRepository.findById("ADVICE008");
                         adviceList.add(advice.get());
                     }
-                    if (request.getAge() >= 30 && !question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
+                    if (question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY001") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY003"))) {
                         Optional<Advice> advice = adviceRepository.findById("ADVICE009");
-                        adviceList.add(advice.get());
-                    }
-                    if (request.getAge() >= 30 && question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY001") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY003"))) {
-                        Optional<Advice> advice = adviceRepository.findById("ADVICE010");
-                        adviceList.add(advice.get());
-                    }
-                    if (request.getAge() < 30 && question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY001") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY003"))) {
-                        Optional<Advice> advice = adviceRepository.findById("ADVICE013");
-                        adviceList.add(advice.get());
-                    }
-                    if (request.getAge() >= 30 && question002.isResult()  && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
-                        Optional<Advice> advice = adviceRepository.findById("ADVICE014");
-                        adviceList.add(advice.get());
-                    }
-                    if (request.getAge() < 30 && question002.isResult() && (pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY002") || pathologyList.get(i).getId().equalsIgnoreCase("PATHOLOGY004"))) {
-                        Optional<Advice> advice = adviceRepository.findById("ADVICE015");
                         adviceList.add(advice.get());
                     }
                 }
@@ -171,6 +166,10 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
                         break;
                     }
                 }
+            }
+            if (pathologyList.get(i).getId().contains("PATHOLOGY006")) {
+                Optional<Advice> advice = adviceRepository.findById("ADVICE013");
+                adviceList.add(advice.get());
             }
         }
         response.setAdviceList(adviceList);
@@ -195,8 +194,8 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
     private boolean checkAllParam(FirstProcessRequest request) {
         if (request.getGlucose() < 5.6 && request.getHba1c() < 5.7 && request.getAlbumin() >= 35 && request.getAlbumin() <= 50
                 && request.getAlt() >= 7 && request.getAlt() <= 56 && request.getAlp() >= 30 && request.getAlp() <= 120
-                && request.getUre() >= 2.5 && request.getUre() <= 7.5 && request.getBilirubinTp() >= 3.4 && request.getBilirubinTp() <= 17.1
-                && request.getBilirubinTt() <= 7.0) {
+                && request.getUre() >= 2.5 && request.getUre() <= 7.5 && request.getBilirubinTP() >= 3.4 && request.getBilirubinTP() <= 17.1
+                && request.getBilirubinTT() <= 7.0) {
             if (request.getGender().equalsIgnoreCase("male")) {
                 if (request.getAst() <= 50 && request.getAst() >= 10 && request.getCreatinin() <= 106 && request.getCreatinin() >= 53
                         && request.getAcidUric() <= 8.0 && request.getAcidUric() >= 2.5) {
@@ -218,4 +217,31 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
         }
         return true;
     }
+
+    boolean validateInput(FirstProcessRequest request) {
+        try {
+            if (request.getAge() == null || request.getAge() < 1
+                    || request.getGender() == null
+                    || request.getWeight() == null || request.getWeight() <= 0
+                    || request.getHeight() == null || request.getHeight() <= 0
+                    || request.getGlucose() == null || request.getGlucose() <= 0
+                    || request.getHba1c() == null || request.getHba1c() <= 0
+                    || request.getBilirubinTP() == null || request.getBilirubinTP() <= 0
+                    || request.getBilirubinTT() == null || request.getBilirubinTT() <= 0
+                    || request.getAst() == null || request.getAst() <= 0
+                    || request.getAlt() == null || request.getAlt() <= 0
+                    || request.getAlbumin() == null || request.getAlbumin() <= 0
+                    || request.getAlp() == null || request.getAlp() <= 0
+                    || request.getUre() == null || request.getUre() <= 0
+                    || request.getCreatinin() == null || request.getCreatinin() <= 0
+                    || request.getAcidUric() == null || request.getAcidUric() <= 0) {
+                return false;
+            }
+                return true;
+        } catch (Exception e) {
+            return false;
+        }
+
+    }
+
 }
