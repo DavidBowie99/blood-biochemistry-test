@@ -228,26 +228,26 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
                 Optional<Advice> advice = adviceRepository.findById("ADVICE016");
                 adviceList.add(advice.get());
             }
-            if (ckd.equalsIgnoreCase("CKD_LEVEL_1")) {
-                Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_1");
-                adviceList.add(advice.get());
-            }
-            if (ckd.equalsIgnoreCase("CKD_LEVEL_2")) {
-                Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_2");
-                adviceList.add(advice.get());
-            }
-            if (ckd.equalsIgnoreCase("CKD_LEVEL_3A")) {
-                Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_3A");
-                adviceList.add(advice.get());
-            }
-            if (ckd.equalsIgnoreCase("CKD_LEVEL_3B")) {
-                Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_3B");
-                adviceList.add(advice.get());
-            }
-            if (ckd.equalsIgnoreCase("CKD_LEVEL_4")) {
-                Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_4");
-                adviceList.add(advice.get());
-            }
+        }
+        if (ckd.equalsIgnoreCase("CKD_LEVEL_1")) {
+            Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_1");
+            adviceList.add(advice.get());
+        }
+        if (ckd.equalsIgnoreCase("CKD_LEVEL_2")) {
+            Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_2");
+            adviceList.add(advice.get());
+        }
+        if (ckd.equalsIgnoreCase("CKD_LEVEL_3A")) {
+            Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_3A");
+            adviceList.add(advice.get());
+        }
+        if (ckd.equalsIgnoreCase("CKD_LEVEL_3B")) {
+            Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_3B");
+            adviceList.add(advice.get());
+        }
+        if (ckd.equalsIgnoreCase("CKD_LEVEL_4")) {
+            Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_4");
+            adviceList.add(advice.get());
         }
         response.setAdviceList(adviceList);
         return response;
@@ -289,7 +289,7 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
                 && request.getUre() >= 2.5 && request.getUre() <= 7.5 && request.getBilirubinTP() >= 3.4 && request.getBilirubinTP() <= 17.1
                 && request.getBilirubinTT() <= 7.0) {
             if (request.getGender().equalsIgnoreCase("male")) {
-                if (request.getAst() <= 50 && request.getAst() >= 10 && request.getCreatinin() <= 106 && request.getCreatinin() >= 53
+                if (request.getAst() <= 50 && request.getAst() >= 10 && request.getCreatinin() <= 107 && request.getCreatinin() >= 53
                         && request.getAcidUric() <= 8.0 && request.getAcidUric() >= 2.5) {
                     return true;
                 } else {
