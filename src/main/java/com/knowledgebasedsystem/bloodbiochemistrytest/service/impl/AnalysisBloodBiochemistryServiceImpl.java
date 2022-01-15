@@ -1,7 +1,6 @@
 package com.knowledgebasedsystem.bloodbiochemistrytest.service.impl;
 
 import com.knowledgebasedsystem.bloodbiochemistrytest.constant.BMI;
-import com.knowledgebasedsystem.bloodbiochemistrytest.constant.BloodBiochemistryLimit;
 import com.knowledgebasedsystem.bloodbiochemistrytest.entity.Advice;
 import com.knowledgebasedsystem.bloodbiochemistrytest.entity.Pathology;
 import com.knowledgebasedsystem.bloodbiochemistrytest.entity.Question;
@@ -16,7 +15,6 @@ import com.knowledgebasedsystem.bloodbiochemistrytest.repository.QuestionReposit
 import com.knowledgebasedsystem.bloodbiochemistrytest.service.AnalysisBloodBiochemistryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +80,30 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
             Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY006");
             pathologyList.add(pathology.get());
         }
+        if (request.getBilirubinTP() >= 171 && request.getBilirubinTP() <= 342) {
+            Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY007");
+            pathologyList.add(pathology.get());
+        }
+        if (request.getAlp() >= 180 && request.getAlp() <= 360) {
+            Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY009");
+            pathologyList.add(pathology.get());
+        }
+        if (request.getAlp() >= 513 && request.getAlp() <= 684) {
+            Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY010");
+            pathologyList.add(pathology.get());
+        }
+        if (request.getAlbumin() > 50 || request.getCreatinin() > 107
+                || (request.getAcidUric() > 7.5 && request.getGender().equalsIgnoreCase("female"))
+                || (request.getAcidUric() > 8.0 && request.getGender().equalsIgnoreCase("male"))) {
+            Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY011");
+            pathologyList.add(pathology.get());
+        }
+        if ((request.getAst() > 35 && request.getGender().equalsIgnoreCase("female"))
+                || (request.getAst() > 50 && request.getGender().equalsIgnoreCase("male"))
+                || request.getAlt() > 56 || request.getAlbumin() < 35) {
+            Optional<Pathology> pathology = pathologyRepository.findById("PATHOLOGY008");
+            pathologyList.add(pathology.get());
+        }
         response.setPathologyList(pathologyList);
         response.setQuestionList(question);
         return response;
@@ -93,6 +115,21 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
         List<Advice> adviceList = new ArrayList<>();
         List<Pathology> pathologyList = request.getPathologyList();
         List<QuestionSecondProcess> questionList = request.getQuestionSecondProcesses();
+        String bmi = calculateBMI(request.getWeight(), request.getHeight());
+        String ckd = calculateCKD(request.getCreatinin());
+        if (bmi.equalsIgnoreCase(BMI.BMI_1)) {
+            Optional<Advice> advice = adviceRepository.findById("BMI001");
+            adviceList.add(advice.get());
+        } else if (bmi.equalsIgnoreCase(BMI.BMI_2)) {
+            Optional<Advice> advice = adviceRepository.findById("BMI002");
+            adviceList.add(advice.get());
+        } else if (bmi.equalsIgnoreCase(BMI.BMI_3)) {
+            Optional<Advice> advice = adviceRepository.findById("BMI003");
+            adviceList.add(advice.get());
+        } else if (bmi.equalsIgnoreCase(BMI.BMI_4)) {
+            Optional<Advice> advice = adviceRepository.findById("BMI004");
+            adviceList.add(advice.get());
+        }
         for (int i = 0; i < pathologyList.size(); i++) {
             if (pathologyList.get(i).getId().contains("PATHOLOGY001") || pathologyList.get(i).getId().contains("PATHOLOGY002")
                     || pathologyList.get(i).getId().contains("PATHOLOGY003") || pathologyList.get(i).getId().contains("PATHOLOGY004")) {
@@ -171,6 +208,46 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
                 Optional<Advice> advice = adviceRepository.findById("ADVICE013");
                 adviceList.add(advice.get());
             }
+            if (pathologyList.get(i).getId().contains("PATHOLOGY007")) {
+                Optional<Advice> advice = adviceRepository.findById("ADVICE014");
+                adviceList.add(advice.get());
+            }
+            if (pathologyList.get(i).getId().contains("PATHOLOGY008")) {
+                Optional<Advice> advice = adviceRepository.findById("ADVICE017");
+                adviceList.add(advice.get());
+            }
+            if (pathologyList.get(i).getId().contains("PATHOLOGY009")) {
+                Optional<Advice> advice = adviceRepository.findById("ADVICE018");
+                adviceList.add(advice.get());
+            }
+            if (pathologyList.get(i).getId().contains("PATHOLOGY010")) {
+                Optional<Advice> advice = adviceRepository.findById("ADVICE015");
+                adviceList.add(advice.get());
+            }
+            if (pathologyList.get(i).getId().contains("PATHOLOGY011")) {
+                Optional<Advice> advice = adviceRepository.findById("ADVICE016");
+                adviceList.add(advice.get());
+            }
+            if (ckd.equalsIgnoreCase("CKD_LEVEL_1")) {
+                Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_1");
+                adviceList.add(advice.get());
+            }
+            if (ckd.equalsIgnoreCase("CKD_LEVEL_2")) {
+                Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_2");
+                adviceList.add(advice.get());
+            }
+            if (ckd.equalsIgnoreCase("CKD_LEVEL_3A")) {
+                Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_3A");
+                adviceList.add(advice.get());
+            }
+            if (ckd.equalsIgnoreCase("CKD_LEVEL_3B")) {
+                Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_3B");
+                adviceList.add(advice.get());
+            }
+            if (ckd.equalsIgnoreCase("CKD_LEVEL_4")) {
+                Optional<Advice> advice = adviceRepository.findById("CKD_LEVEL_4");
+                adviceList.add(advice.get());
+            }
         }
         response.setAdviceList(adviceList);
         return response;
@@ -187,6 +264,21 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
             return BMI.BMI_3;
         } else if (bmi >= 25) {
             return BMI.BMI_4;
+        }
+        return "NO_DATA";
+    }
+
+    public String calculateCKD(Float creatinin) {
+        if (creatinin > 107 && creatinin < 130) {
+            return "CKD_LEVEL_1";
+        } else if (creatinin >= 130 && creatinin <= 299) {
+            return "CKD_LEVEL_2";
+        } else if (creatinin >= 300 && creatinin <= 499) {
+            return "CKD_LEVEL_3A";
+        } else if (creatinin >= 500 && creatinin <= 900) {
+            return "CKD_LEVEL_3B";
+        } else if (creatinin >= 900) {
+            return "CKD_LEVEL_4";
         }
         return "NO_DATA";
     }

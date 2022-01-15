@@ -26,6 +26,8 @@ public class SecondProcessRequest {
 
     private Boolean pregnant;//Có đang mang thai: TRUE/FALSE
 
+    private Float creatinin;//Chỉ số careatinin huyết thanh
+
     private List<Pathology> pathologyList;//Danh sách bệnh
 
     private List<QuestionSecondProcess> questionSecondProcesses;//Danh sách câu hỏi

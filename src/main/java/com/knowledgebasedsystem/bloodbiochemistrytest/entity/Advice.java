@@ -22,9 +22,6 @@ public class Advice {
     @Column(name = "ID")
     private String id;
 
-    @Column(name = "PATHOLOGY_ID")
-    private String pathologyId;
-
     @Column(name = "CONTENT")
     private String content;
 }
