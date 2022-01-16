@@ -255,7 +255,7 @@ public class AnalysisBloodBiochemistryServiceImpl implements AnalysisBloodBioche
 
     @Override
     public String calculateBMI(Float weight, Float height) {
-        Float bmi = weight / (height * height);
+        Float bmi = weight*10000/ (height * height);
         if (bmi < 18.5) {
             return BMI.BMI_1;
         } else if (bmi >= 18.5 && bmi < 23) {
